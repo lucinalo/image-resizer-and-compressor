@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Image resizer and compressor</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #F2F2F2;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #DA161F;
+      color: #fff;
+      padding: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-content {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      max-width: 1000px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .header-content img {
+      height: 40px;
+    }
+
+    .header-title {
+      font-size: 1.3rem;
+      font-weight: bold;
+      white-space: normal; 
+      line-height: 1.3;
+    }
+
+    .container {
+      max-width: 1000px;
+      width: 90%;
+      margin: 2rem auto;
+      background: #fff;
+      border-radius: 5px;
+      padding: 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    h1.page-subtitle {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      color: #333;
+    }
+
+    .drag-drop-area {
+      border: 2px dashed #CCCCCC;
+      border-radius: 5px;
+      padding: 5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-bottom: 1.5rem;
+      background: #fafafa;
+    }
+
+    .drag-drop-area:hover {
+      background-color: #f2f2f2;
+    }
+
+    .drag-drop-area.dragover {
+      background-color: #E5E5E5;
+    }
+
+    .drag-drop-area p {
+      font-size: 1rem;
+      color: #333;
+    }
+
+    .browse-btn {
+      background-color: #DA161F;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.8rem;
+      border: none;
+      border-radius: 3px;
+      padding: 0.7rem 1.5rem;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-left: 0.5rem;
+    }
+
+    .browse-btn:hover {
+      background-color: #A00F19;
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    .selected-files {
+      margin: 1rem auto;
+      max-width: 550px;
+      background: #FAFAFA;
+      border: 1px solid #E5E5E5;
+      border-radius: 4px;
+      padding: 1rem;
+      font-size: 0.9rem;
+      color: #333;
+    }
+    .selected-files h2 {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+      color: #333;
+    }
+    .selected-files ol {
+      margin-left: 1.5rem;
+      list-style-type: decimal;
+    }
+
+    .selected-files li {
+      margin-bottom: 0.5rem;
+    }
+
+    .file-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .file-name {
+      flex: 1;
+    }
+
+    .remove-btn {
+      background-color: #666;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      font-size: 0.8rem;
+      padding: 0.7rem 1.5rem;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-left: 0.75rem;
+      transition: background-color 0.3s;
+      font-weight: 600;
+    }
+    .remove-btn:hover {
+      background-color: #555;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .controls label {
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    .controls input[type="number"] {
+      width: 80px;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+
+    .compress-btn,
+    .cancel-btn {
+      border: none;
+      color: #fff;
+      border-radius: 3px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      text-transform: uppercase;
+      padding: 0.7rem 1.5rem;
+    }
+    .compress-btn {
+      background-color: #DA161F;
+    }
+    .compress-btn:hover {
+      background-color: #A00F19;
+    }
+    .cancel-btn {
+      background-color: #666;
+    }
+    .cancel-btn:hover {
+      background-color: #555;
+    }
+
+    .hint {
+      padding-top: 0.5rem;
+      margin-top: 0.75rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    #resultContainer {
+      margin-top: 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2rem;
+    }
+
+    .result-item {
+      background: #FAFAFA;
+      border-radius: 3px;
+      padding: 1rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .result-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .result-item img {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #E5E5E5;
+      margin-bottom: 0.75rem;
+    }
+
+    .file-info {
+      font-size: 0.85rem;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+
+    .download-link {
+      display: inline-block;
+      text-decoration: none;
+      color: #DA161F;
+      border: 1px solid #DA161F;
+      padding: 0.7rem 1.5rem;
+      border-radius: 3px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      transition: background-color 0.3s, color 0.3s;
+      margin-top: 0.5rem;
+      text-transform: uppercase;
+    }
+    .download-link:hover {
+      background-color: #DA161F;
+      color: #fff;
+    }
+
+    .error-message {
+      color: #d00;
+      font-size: 0.85rem;
+      margin-top: 5px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: auto;
+      padding: 1rem;
+      color: #555;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="header-content">
+      <a href="https://www.theglobeandmail.com" target="_blank" rel="noopener">
+        <img 
+          src="https://www.theglobeandmail.com/files/cem/icons/www/cache-long/globe-logo-red.png"
+          alt="The Globe and Mail"
+        />
+      </a>
+      <h1 class="header-title">Image resizer and compressor</h1>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="drag-drop-area" id="dropZone">
+      <button type="button" class="browse-btn">Browse</button>
+      <br><br>
+      <p>
+        Bulk resize photos and compress images to a specific file size.
+        Drag and drop images here, or upload files from your computer.
+      </p>
+      <input type="file" id="fileInput" multiple accept="image/*" />
+    </div>
+
+    <div class="selected-files" id="selectedFiles">
+      <h2>Selected Files</h2>
+      <p>No files selected.</p>
+    </div>
+
+    <div class="controls">
+      <div>
+        <label for="maxWidth">Max Width:</label>
+        <input type="number" id="maxWidth" placeholder="e.g. 1024" value="0" />
+      </div>
+      <div>
+        <label for="maxHeight">Max Height:</label>
+        <input type="number" id="maxHeight" placeholder="e.g. 768" value="0" />
+      </div>
+      <div>
+        <label for="targetSizeKB">Target Size (KB):</label>
+        <input type="number" id="targetSizeKB" placeholder="e.g. 500" value="500" />
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="compress-btn" id="resizeBtn">Resize &amp; Compress</button>
+      <button class="cancel-btn" id="cancelBtn">Clear All</button>
+    </div>
+
+    <p class="hint">
+      <strong>Notes:</strong>
+      - Set <em>max width</em> or <em>max height</em> to <strong>0</strong> to leave that dimension unconstrained.<br>
+      - If minimal quality can't reach the target size, an error will appear under that image.<br>
+      - All input image types (PNG, JPEG, etc.) are ultimately exported as JPEG.
+    </p>
+
+    <div id="resultContainer"></div>
+  </div>
+
+  <footer>
+    &copy; 2025
+  </footer>
+
+  <script>
+    const dropZone         = document.getElementById('dropZone');
+    const fileInput        = document.getElementById('fileInput');
+    const selectedFilesDiv = document.getElementById('selectedFiles');
+    const resizeBtn        = document.getElementById('resizeBtn');
+    const cancelBtn        = document.getElementById('cancelBtn');
+    const resultContainer  = document.getElementById('resultContainer');
+    const maxWidthInput    = document.getElementById('maxWidth');
+    const maxHeightInput   = document.getElementById('maxHeight');
+    const targetSizeKBInput= document.getElementById('targetSizeKB');
+
+    let selectedFiles = [];
+
+    // --- DRAG & DROP ---
+    dropZone.addEventListener('dragenter', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.classList.remove('dragover');
+    });
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.classList.remove('dragover');
+
+      const files = e.dataTransfer.files;
+      handleIncomingFiles(files);
+    });
+
+    const browseBtn = dropZone.querySelector('.browse-btn');
+    browseBtn.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', () => {
+      handleIncomingFiles(fileInput.files);
+    });
+
+    function handleIncomingFiles(files) {
+      const newFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+      selectedFiles = newFiles;
+
+      if (selectedFiles.length === 0) {
+        selectedFilesDiv.innerHTML = `
+          <h2>Selected Files</h2>
+          <p>No files selected.</p>
+        `;
+      } else {
+        showSelectedFiles(selectedFiles);
+      }
+      resultContainer.innerHTML = '';
+    }
+
+    function showSelectedFiles(fileArray) {
+      selectedFilesDiv.innerHTML = '<h2>Selected Files</h2>';
+      const ol = document.createElement('ol');
+
+      fileArray.forEach((file, index) => {
+        const li = document.createElement('li');
+
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'file-row';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'file-name';
+        nameSpan.textContent = file.name;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-btn';
+        removeBtn.textContent = 'Remove';
+        removeBtn.addEventListener('click', () => removeFile(index));
+
+        rowDiv.appendChild(nameSpan);
+        rowDiv.appendChild(removeBtn);
+
+        li.appendChild(rowDiv);
+        ol.appendChild(li);
+      });
+
+      selectedFilesDiv.appendChild(ol);
+    }
+
+    function removeFile(index) {
+      selectedFiles.splice(index, 1);
+      if (selectedFiles.length > 0) {
+        showSelectedFiles(selectedFiles);
+      } else {
+        selectedFilesDiv.innerHTML = `
+          <h2>Selected Files</h2>
+          <p>No files selected.</p>
+        `;
+      }
+      resultContainer.innerHTML = '';
+    }
+
+    resizeBtn.addEventListener('click', () => {
+      resultContainer.innerHTML = '';
+
+      if (!selectedFiles || selectedFiles.length === 0) {
+        alert("Please select at least one image (via drag/drop or browse).");
+        return;
+      }
+
+      const maxWidth = parseInt(maxWidthInput.value, 10) || 0;
+      const maxHeight = parseInt(maxHeightInput.value, 10) || 0;
+      const targetSizeKB = parseInt(targetSizeKBInput.value, 10) || 500;
+      const targetSizeBytes = targetSizeKB * 1024;
+
+      selectedFiles.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const imageDataUrl = e.target.result;
+          resizeAndCompressImage(imageDataUrl, file.name, maxWidth, maxHeight, targetSizeBytes);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    cancelBtn.addEventListener('click', () => {
+      selectedFiles = [];
+      fileInput.value = '';
+      selectedFilesDiv.innerHTML = `
+        <h2>Selected Files</h2>
+        <p>No files selected.</p>
+      `;
+      resultContainer.innerHTML = '';
+    });
+
+    function resizeAndCompressImage(imageDataUrl, originalName, maxWidth, maxHeight, targetSizeBytes) {
+      const img = new Image();
+      img.src = imageDataUrl;
+      img.onload = () => {
+        const [newWidth, newHeight] = getDimensions(img.width, img.height, maxWidth, maxHeight);
+
+        const canvas = document.createElement('canvas');
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+        compressToTargetSize(canvas, targetSizeBytes, (finalDataUrl, finalSizeBytes, finalQuality) => {
+          renderResult(finalDataUrl, finalSizeBytes, finalQuality, originalName, newWidth, newHeight);
+        });
+      };
+    }
+
+    function getDimensions(origW, origH, maxW, maxH) {
+      if (maxW === 0 && maxH === 0) {
+        return [origW, origH];
+      }
+      let newW = origW;
+      let newH = origH;
+
+      if (maxW > 0 && maxH > 0) {
+        const ratioW = maxW / origW;
+        const ratioH = maxH / origH;
+        const ratio = Math.min(ratioW, ratioH);
+        if (ratio < 1) {
+          newW = Math.round(origW * ratio);
+          newH = Math.round(origH * ratio);
+        }
+      } else if (maxW > 0) {
+        if (origW > maxW) {
+          const ratio = maxW / origW;
+          newW = maxW;
+          newH = Math.round(origH * ratio);
+        }
+      } else if (maxH > 0) {
+        if (origH > maxH) {
+          const ratio = maxH / origH;
+          newH = maxH;
+          newW = Math.round(origW * ratio);
+        }
+      }
+      return [newW, newH];
+    }
+
+    function compressToTargetSize(canvas, targetSizeBytes, callback) {
+      let minQ = 0.0;
+      let maxQ = 1.0;
+      let midQ = 1.0;
+      let finalDataUrl = canvas.toDataURL('image/jpeg', midQ);
+      let finalSizeBytes = dataUrlSize(finalDataUrl);
+
+      if (finalSizeBytes <= targetSizeBytes) {
+        return callback(finalDataUrl, finalSizeBytes, midQ);
+      }
+      for (let i = 0; i < 10; i++) {
+        midQ = (minQ + maxQ) / 2;
+        const testDataUrl = canvas.toDataURL('image/jpeg', midQ);
+        const testSize = dataUrlSize(testDataUrl);
+
+        if (testSize > targetSizeBytes) {
+          maxQ = midQ;
+        } else {
+          minQ = midQ;
+          finalDataUrl = testDataUrl;
+          finalSizeBytes = testSize;
+        }
+      }
+      callback(finalDataUrl, finalSizeBytes, midQ);
+    }
+
+    function dataUrlSize(dataUrl) {
+      const base64String = dataUrl.split(',')[1] || '';
+      return Math.floor(base64String.length * 0.75);
+    }
+
+    function renderResult(dataUrl, sizeBytes, quality, originalName, width, height) {
+      const sizeKB = (sizeBytes / 1024).toFixed(1);
+
+      const resultItem = document.createElement('div');
+      resultItem.className = 'result-item';
+
+      const imgEl = document.createElement('img');
+      imgEl.src = dataUrl;
+      resultItem.appendChild(imgEl);
+
+      const infoEl = document.createElement('div');
+      infoEl.className = 'file-info';
+      infoEl.textContent = `Final Size: ~${sizeKB} KB | Quality: ${quality.toFixed(2)} | ${width}x${height}`;
+      resultItem.appendChild(infoEl);
+
+      const targetSize = parseInt(targetSizeKBInput.value, 10) * 1024;
+      if (sizeBytes > targetSize) {
+        const errEl = document.createElement('div');
+        errEl.className = 'error-message';
+        errEl.textContent = 'Could not reach target size at minimal quality.';
+        resultItem.appendChild(errEl);
+      }
+
+      const downloadLink = document.createElement('a');
+      downloadLink.className = 'download-link';
+      const baseName = originalName.replace(/\.[^/.]+$/, '');
+      const newFileName = `${baseName}-compressed.jpg`;
+      downloadLink.download = newFileName;
+      downloadLink.href = dataUrl;
+      downloadLink.innerText = 'Download';
+      resultItem.appendChild(downloadLink);
+
+      resultContainer.appendChild(resultItem);
+    }
+  </script>
+</body>
+</html>
