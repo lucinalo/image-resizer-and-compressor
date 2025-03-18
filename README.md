@@ -33,6 +33,8 @@ No installation needed—purely client-side:
 - Clone or download this repository.
 - Open `index.html` in any modern browser.
 
+## Screenshots
+
 ![Screenshot 2025-03-18 at 9 50 13 AM](https://github.com/user-attachments/assets/76870e44-7ce5-46ac-b1f8-eb18abd818bb)
 ![Screenshot 2025-03-18 at 9 50 32 AM](https://github.com/user-attachments/assets/90eb8fde-1864-4c20-9dd4-ed515e8bbab5)
 ![Screenshot 2025-03-18 at 9 51 19 AM](https://github.com/user-attachments/assets/9c84c7c0-2a51-4468-b19a-c890f32f4760)
