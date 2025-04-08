@@ -10,10 +10,9 @@ A simple, client-side tool for **bulk image resizing** and **file-size compressi
 - **Compress** images (exported as **JPEG**) to meet a target file size (using a binary search on JPEG quality).
 - **Remove** button for each selected file to easily manage your list.
 - **Rename** options:
-  - **Individual rename** for each compressed image (prompts you to enter a new name).
-  - **Batch rename** (all images get `prefix-1.jpg`, `prefix-2.jpg`, etc.) – collisions are disallowed.
+  - **Individual rename** for each compressed image.
+  - **Batch rename** (all images get `prefix-1.jpg`, `prefix-2.jpg`, etc.) – files cannot have the same name as another file.
 - **Export**: Download results individually or export them all at once as a single `.zip`.
-- Displays an **error** if minimal quality still can’t meet your target file size (i.e., “Could not reach target size at minimal quality.”)
 
 ## How It Works
 
